@@ -1,0 +1,32 @@
+---
+title: "Preprocessing_data_NPL_WOMM"
+author: "Sebastian Robledo"
+date: "9/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Creating the environment
+
+```{r}
+library(tidyverse)
+library(extractr)
+library(here)
+library(pdftools)
+```
+
+# Getting data 
+
+```{r}
+pdfs <- list.files(here("data/pdfs"))
+
+wos_txt <- 
+  pdf_text(pdf = here("data/pdfs", pdfs[2])) |> 
+  read_lines() %>% 
+  tibble() %>% 
+  rename(doc_line = ".") %>% 
+  mutate(lines = 1:length(doc_line))
+```
