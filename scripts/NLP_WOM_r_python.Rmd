@@ -1,0 +1,75 @@
+---
+title: "WOM_NLP_LDA"
+author: "Sebastian Robledo"
+date: "9/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Creting the environment 
+
+R packages
+
+```{r}
+library(tidyverse)
+library(bibtex)
+library(here)
+library(reticulate) # python y r
+```
+
+```{python}
+
+```
+
+
+```{r}
+# py_install("bibtexparser")
+# py_install("nump"y")
+# py_install("pandas")
+```
+
+
+# Getting data 
+
+```{r}
+wom_data_theory <- 
+  bibtex::read.bib(here("data", "WOM_theory.bib"))
+```
+
+```{python}
+import bibtexparser
+import numpy as np
+import pandas as pd
+```
+
+```{python}
+with open("/Users/sebastianrobledo/Google Drive/My Drive/A. RESEARCH/Papers Luis Amigo/NPL_WOM_PAPER/NLP_WOMM/data/WOM_theory.bib") as bibtex_file:
+  bib_database = bibtexparser.load(bibtex_file)
+
+df = pd.DataFrame(bib_database.entries)
+  
+```
+
+```{r}
+df_r <- 
+  py$df |> 
+  select(title, abstract) |> 
+  mutate(title = str_remove_all(title, 
+                                "\\}"),
+         title = str_remove_all(title,
+                                "\\{"))
+```
+
+```{r}
+py_to_r(df)
+```
+
+
+```{python}
+df_r = py_to_r(df)
+```
+
+
