@@ -43,3 +43,4 @@ vignettes/*.pdf
 *.txt
 Icon
 desktop.ini
+*Rproj

@@ -15,7 +15,6 @@ R packages
 
 ```{r}
 library(tidyverse)
-#library(bibtex)
 library(here)
 library(reticulate) # python y r
 library(bib2df)
@@ -29,46 +28,129 @@ library(bib2df)
 # py_install("gensim")
 # py_install("matplotlib")
 #py_install("nltk")
-py_install("pyprojroot")
+# py_install("pyprojroot")
+# py_install("wordcloud")
+# py_install("pyLDAvis")
+# py_install("pyLDAvis.gensim_models") No installó
+# py_install("spacy")
 ```
-
-```{python}
-import matplotlib.pyplot as plt
-```
-
-
 
 # Getting data 
 
 ```{python}
-import bibtexparser
+# import bibtexparser
 import numpy as np
 import pandas as pd
-import pyprojroot
+# import pyprojroot
+import nltk
+import gensin.models 
+import matplotlib as plt
+import wordcloud
+import pyLDAvis
+import gensim
+# import pyLDAvis.gensim_models as gensimvis
 ```
-
-```{r}
-wom_data_theory <- 
-  bib2df(here("data", "WOM_theory.bib")) |> 
-  select(TITLE, ABSTRACT) %>% 
-  filter(!is.na(ABSTRACT))
-```
-
 
 # Preprocessing
 
 ```{python}
-# Convierte a lista
-data = r(wom_data_theory).values.astype(str).tolist()
+nltk.download('stopwords')
+
+from pprint import pprint
+
+# Gensim
+
+import gensim.corpora as corpora
+from gensim.utils import simple_preprocess
+from gensim.models import CoherenceModel
+# !pip install "gensim==3.8.1"
+# from gensim.models.wrappers import LdaMallet # not installed
+
+# spacy para lemmatization
+import spacy
+
+# Enable logging para gensim - optional (para generar mensajes en forma de logs)
+import logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.ERROR)
+
+import warnings
+warnings.filterwarnings("ignore",category=DeprecationWarning)
+
+# NLTK Stop words
+from nltk.corpus import stopwords
+stop_words = stopwords.words('english')
+stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
+
+# To convert bibtex
+# import bibtexparser
+
+# to paint the gensim model
+import matplotlib.pyplot as plt
+
+# to word cloud
+from wordcloud import WordCloud
 ```
 
+```{python}
+data = r.wos_txt
+type(data)
+```
 
 ```{python}
 def sent_to_words(sentences):
-  for sentence in sentences:
-    yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))
-    
-    
+    for sentence in sentences:
+        yield(gensim.utils.simple_preprocess(str(sentence), deacc=True))  # deacc=True removes punctuations
+
+data_words = list(sent_to_words(data))
+
+print(data_words[:1])
 ```
 
+```{python}
+# Build the bigram and trigram models
+bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100) # higher threshold fewer phrases.
+trigram = gensim.models.Phrases(bigram[data_words], threshold=100)  
+
+# Faster way to get a sentence clubbed as a trigram/bigram
+bigram_mod = gensim.models.phrases.Phraser(bigram)
+trigram_mod = gensim.models.phrases.Phraser(trigram)
+
+# See trigram example
+print(trigram_mod[bigram_mod[data_words[0]]])
+```
+
+```{python}
+def remove_stopwords(texts):
+    return [[word for word in simple_preprocess(str(doc)) if word not in stop_words] for doc in texts]
+
+def make_bigrams(texts):
+    return [bigram_mod[doc] for doc in texts]
+
+def make_trigrams(texts):
+    return [trigram_mod[bigram_mod[doc]] for doc in texts]
+
+def lemmatization(texts, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV']):
+    """https://spacy.io/api/annotation"""
+    texts_out = []
+    for sent in texts:
+        doc = nlp(" ".join(sent)) 
+        texts_out.append([token.lemma_ for token in doc if token.pos_ in allowed_postags])
+    return texts_out
+```
+
+```{python}
+# Eliminación de Stop Words
+data_words_nostops = remove_stopwords(data_words)
+
+# Determinación de bigramas
+data_words_bigrams = make_bigrams(data_words_nostops)
+
+# Modelo de spacy en inglés
+nlp = spacy.load('en', disable=['parser', 'ner'])
+
+# Lematización manteniendo sustantivos, adverbios, adejtivos y verbos
+data_lemmatized = lemmatization(data_words_bigrams, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV'])
+
+print(data_lemmatized[:1])
+```
 
