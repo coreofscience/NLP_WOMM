@@ -41,6 +41,8 @@ vignettes/*.pdf
 *.pdf
 *.bib
 *.txt
-Icon
+Icon/r
 desktop.ini
 *Rproj
+*.csv
+*.ipynb
