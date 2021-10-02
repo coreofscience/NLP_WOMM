@@ -42,7 +42,7 @@ for (i in pdfs$papers) {
   
   df <- 
     bind_rows(df_1,
-              df)
+              df) 
   
 }
 

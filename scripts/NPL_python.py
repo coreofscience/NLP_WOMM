@@ -75,7 +75,7 @@ def lemmatization(texts, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV']):
         texts_out.append([token.lemma_ for token in doc if token.pos_ in allowed_postags])
     return texts_out
 
-# Eliminación de Stop Words
+# Eliminación de Stop Words 
 data_words_nostops = remove_stopwords(data_words)
 
 # Determinación de bigramas
