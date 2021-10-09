@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
-library(extractr)
+#library(extractr)
 library(here)
 library(pdftools)
 ```
@@ -25,7 +25,8 @@ pdfs <-
   list.files(here("data/pdfs")) |> 
   tibble() |>
   rename(papers = "list.files(here(\"data/pdfs\"))") |> 
-  filter(!(papers %in% "Icon\r")) 
+  filter(!(papers %in% "Icon\r"),
+         !(papers %in% "desktop.ini")) 
   
 
 df <- tibble()
